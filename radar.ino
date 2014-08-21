@@ -1,6 +1,14 @@
 #include "Arduino.h"
 #include <Servo.h>
 
+int range;
+int angle;
+int servo_direction;
+int radar_incrament = 10;
+int delay_time = 1;
+int ultrasonic_radar_position = 2;
+int servo_radar_position = 7;
+
 class Ultrasonic
 {
     public:
@@ -18,7 +26,7 @@ Ultrasonic::Ultrasonic(int pin)
 }
 void Ultrasonic::DistanceMeasure(void)
 {
-     pinMode(_pin, OUTPUT);
+    pinMode(_pin, OUTPUT);
     digitalWrite(_pin, LOW);
     delayMicroseconds(2);
     digitalWrite(_pin, HIGH);
@@ -36,49 +44,43 @@ long Ultrasonic::microsecondsToInches(void)
     return duration/74/2;   
 }
 
-Ultrasonic ultrasonic(2);
-Servo myServo;
-
-int range;
-int angle;
-int servo_direction;
-int radar_incrament = 10;
-int delay_time = 1;
+Ultrasonic ultrasonic_radar(ultrasonic_radar_position);
+Servo servo_radar;
 
 void setup() {
     Serial.println("Starting...");
  
-    myServo.attach(7);
+    servo_radar.attach(servo_radar_position);
     Serial.begin(9600);
  
     angle = 0;
     servo_direction = 0;
-    myServo.write(angle);
+    servo_radar.write(angle);
 }
 
 void loop() {
-  ultrasonic.DistanceMeasure();
-  range = ultrasonic.microsecondsToInches();
+    ultrasonic_radar.DistanceMeasure();
+    range = ultrasonic_radar.microsecondsToInches();
  
-  Serial.print("range: ");
-  Serial.print(range);
+    Serial.print("range: ");
+    Serial.print(range);
  
-  Serial.print(", angle: ");
-  Serial.println(angle);
+    Serial.print(", angle: ");
+    Serial.println(angle);
 
-  if (angle>=180) {
-    servo_direction = 1;
-  } else if (angle<=0) {
-    servo_direction = 0;
-  }
+    if (angle>=180) {
+        servo_direction = 1;
+    } else if (angle<=0) {
+        servo_direction = 0;
+    }
 
-  if (servo_direction) {
-    angle-=radar_incrament;
-  } else {
-    angle+=radar_incrament;
-  }
+    if (servo_direction) {
+        angle -= radar_incrament;
+    } else {
+        angle += radar_incrament;
+    }
  
-  myServo.write(angle);
+    servo_radar.write(angle);
 
-  delay(delay_time);
+    delay(delay_time);
 }
